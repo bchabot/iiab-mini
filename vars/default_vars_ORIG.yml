@@ -100,7 +100,7 @@ iiab_hostname: box
 iiab_domain: lan
 lan_ip: 10.10.10.10
 network_172: False    # Change to True if you set the above to 172.18.96.1
-lan_netmask: 255.255.0.0    # Change to 255.255.224.0 if using 172.18.96.1
+lan_netmask: 255.255.255.0    # Change to 255.255.224.0 if using 172.18.96.1
 
 # Internal Wi-Fi Access Point
 # Values are used if there is an internal Wi-Fi adapter and hostapd is enabled.
@@ -121,9 +121,9 @@ lan_netmask: 255.255.0.0    # Change to 255.255.224.0 if using 172.18.96.1
 # Finally, if IIAB does not detect a country code from your OS, the following
 # fallback variable will be used instead: (to populate /etc/hostapd/hostapd.conf)
 host_country_code: US
-host_ssid: Mini
+host_ssid: Internet in a Box
 host_wifi_mode: g
-host_channel: 9
+host_channel: 6
 hostapd_secure: False    # 2021-03-02 WiFi EAPOL fails if hotspot passwords,
 hostapd_password: changeme    # espec if WiFi firmware patched below?  #2696
 hostapd_install: True    # 2020-01-21: this var MIGHT be implemented in future.
@@ -152,7 +152,7 @@ wifi_up_down: True    # AP+STA mode: Uses "ap0" WiFi adapter for upstream WiFi
 # (e.g. to Internet) in addition to downstream WiFi (e.g. classroom hotspot).
 
 # Set True if client machines should have "passthrough" access to WAN/Internet:
-iiab_gateway_enabled: True
+iiab_gateway_enabled: False
 # CAUTION: Setting 'squid_enabled: True' (BELOW) acts as a gateway for Port 80.
 
 # Gateway mode
@@ -173,7 +173,7 @@ wan_gateway:       # wan_gateway: 192.168.1.254
 # 127.0.0.1 means you get dnsmasq (so it works right away on RasPiOS) while
 # 127.0.0.53 gives you systemd-networkd (so Ubuntu itself does NOT use this
 # dnsmasq-specified upstream DNS [e.g. wan_nameserver] but its LAN clients do!)
-wan_nameserver: 8.8.8.8    # wan_nameserver: 192.168.1.254 or 8.8.8.8 or 1.1.1.1
+wan_nameserver:    # wan_nameserver: 192.168.1.254 or 8.8.8.8 or 1.1.1.1
 wan_try_dhcp_before_static_ip: True   # Facilitate field updates w/ cablemodems
 # Details @ roles/network/templates/network/dhcpcd.conf.j2 for /etc/dhcpcd.conf
 
@@ -199,11 +199,22 @@ ports_externally_visible: 3     # ssh + http-or-https + common IIAB services
 dnsmasq_install: True
 dnsmasq_enabled: True
 
+# UNMAINTAINED as of July 2021
+#dhcpd_install: False
+#dhcpd_enabled: False
 
+# UNMAINTAINED as of July 2021
+# named (BIND)
+#named_install: False
+#named_enabled: False
 block_DNS: False
 
 # Enable in local_vars.yml AFTER installing IIAB!  Then run: sudo iiab-network
 dns_jail_enabled: False
+
+# UNMAINTAINED as of October 2017: https://github.com/iiab/iiab/pull/382
+# wondershaper_install: False
+# wondershaper_enabled: False
 
 
 # 1-PREP
@@ -215,14 +226,14 @@ sshd_port: 22    # Not fully functional.  SEE: roles/sshd/tasks/install.yml
 
 # https://remote.it can help you remotely maintain an IIAB.
 # INSTRUCTIONS: https://github.com/iiab/iiab/tree/master/roles/remoteit
-remoteit_install: False
+remoteit_install: True
 remoteit_enabled: False
 # OPTION #1: Run 'sudo iiab-remoteit' later.  OPTION #2: Set this now:
 # remoteit_license_key: 592AA9BB-XXXX-YYYY-ZZZZ-6E27654C3DF6
 
 # SECURITY WARNING: https://wiki.iiab.io/go/Security
 # New VPN replaced OpenVPN in Sept 2024:
-tailscale_install: False
+tailscale_install: True
 tailscale_enabled: False    # Stub var, doesn't yet do anything!
 
 # IIAB-ADMIN runs here - see its vars near top of this file:
@@ -250,8 +261,8 @@ pi_swap_file_size: 1024
 # IIAB by 3-base-server.  Now installed on demand -- as a dependency of Matomo,
 # MediaWiki, Nextcloud, PBX (for FreePBX), WordPress &/or Admin Console.
 # SO BOTH VALUES BELOW ARE INITIALLY IGNORED:
-mysql_install: True
-mysql_enabled: True
+mysql_install: False
+mysql_enabled: False
 mysql_service: mariadb
 
 # 2020-09-24: NGINX is MANDATORY but still evolving - please see:
@@ -282,6 +293,11 @@ gw_block_https: False
 proxy: squid         # Admin Console uses
 proxy_user: proxy    # Could move to roles/network/defaults/main.yml
 
+# UNMAINTAINED as of July 2021
+# DansGuardian REQUIRES Squid (above) be installed & enabled.
+# DansGuardian is NO LONGER AVAILABLE in Debian Buster i.e. since June 2019.
+# dansguardian_install: False
+# dansguardian_enabled: False
 
 # Bluetooth PAN access to IIAB server - for Raspberry Pi - for 4-SERVER-OPTIONS
 bluetooth_install: True
@@ -313,7 +329,7 @@ nmb_service: nmbd    # Could move to roles/samba/defaults/main.yml
 # roles/www_options HANDLES THE 3 VARS BELOW:
 
 # Set to True if intensively using Matomo/PBX/WordPress:
-nginx_high_php_limits: True
+nginx_high_php_limits: False
 # SIMILARLY: 'moodle_install: True' and 'nextcloud_install: True' effectively
 # force this, via roles/www_options & roles/moodle & roles/nextcloud
 # WARNING: This might cause excess use of RAM/disk or other resources!
@@ -328,13 +344,29 @@ apache_service: apache2
 apache_user: www-data    # Admin Console uses
 
 # Toggle iiab-refresh-wiki-docs scraping for offline docs (http://box/info)
-nodocs: True
+nodocs: False
 
 
 # 5-XO-SERVICES
 
 # Lesser-supported XO services need additional testing.  Please contact
 # http://lists.laptop.org/pipermail/server-devel/ if you're able to help test.
+
+# UNMAINTAINED since about 2012-2017
+#xo_services_install: False    # 2020-01-23: UNUSED
+#xo_services_enabled: False    # 2020-01-23: Used in idmgr/tasks/main.yml & iiab-admin-console/roles/console/files/htmlf/20-configure.html
+
+# UNMAINTAINED since about 2012-2017
+#activity_server_install: False    # 2020-01-23: Used in 5-xo-services/tasks/main.yml (originally defined in activity-server/defaults/main.yml)
+#activity_server_enabled: False    # 2020-01-23: Used in activity-server/tasks/main.yml (originally defined in activity-server/defaults/main.yml)
+
+# UNMAINTAINED since about 2012-2017: consider 'ejabberd' in Stage 6-GENERIC-APPS below?
+#ejabberd_xs_install: False    # 2020-01-23: Used in 5-xo-services/tasks/main.yml & roles/ejabberd_xs/tasks/main.yml
+#ejabberd_xs_enabled: False    # 2020-01-23: Used in roles/ejabberd_xs/tasks/main.yml
+
+# UNMAINTAINED since about 2012-2017: change calibre_port from 8080 to 8010 below, if you use idmgr
+#idmgr_install: False    # 2020-01-23: Used in 5-xo-services/tasks/main.yml
+#idmgr_enabled: False    # 2020-01-23: UNUSED
 
 
 # 6-GENERIC-APPS
@@ -351,6 +383,20 @@ azuracast_https_port: 12443
 # being reserved for AzuraCast:
 azuracast_port_range_prefix: 10
 
+# UNMAINTAINED as of January 2020: https://github.com/iiab/iiab/issues/2056
+#dokuwiki_install: False
+#dokuwiki_enabled: False
+#dokuwiki_url: /dokuwiki
+
+# UNMAINTAINED as of November 2019
+#ejabberd_install: False
+#ejabberd_enabled: False
+
+# UNMAINTAINED as of July 2021
+#elgg_install: False
+#elgg_enabled: False
+# elgg_mysql_password: $6$iiab51$jeTwnATcbaa92xo0QBTgjLBU.5aVDDrbKeNyyC99R/TAWz6pvfzj.L7lfnOVVjD78nxqT.gkNn6XZmuRV0W3o1
+elgg_mysql_password: elgg4kids
 
 # Gitea (lightweight self-hosted "GitHub") from https://gitea.io
 gitea_install: False
@@ -399,9 +445,19 @@ nodered_web_path: nodered
 nextcloud_install: False
 nextcloud_enabled: False
 #
+# 2020-02-15: UNUSED at this time.  Legacy remains from Apache:
+# nextcloud_allow_public_ips: True
+#
+# Configuration tips for IPv4 access controls and tuning RAM/resources:
+# https://github.com/iiab/iiab/blob/master/roles/nextcloud/README.md
+#
+# 2020-01-07: If installing IIAB often, download.nextcloud.com may throttle
+# you to ~100 kbit/sec, delaying your IIAB install by an hour or more (#2112).
+# Uncomment the following line to end that: (might install an older Nextcloud!)
+# nextcloud_dl_url: https://d.iiab.io/packages/latest.tar.bz2
 
 # If using WordPress intensively, set nginx_high_php_limits further above.
-wordpress_install: True
+wordpress_install: False
 wordpress_enabled: False
 
 
@@ -414,8 +470,8 @@ kalite_server_port: 8008
 kalite_root: "{{ content_base }}/ka-lite"    # /library/ka-lite
 
 # Successor to KA Lite, for offline-first teaching and learning - from learningequality.org
-kolibri_install: False
-kolibri_enabled: False
+kolibri_install: True
+kolibri_enabled: True
 kolibri_language: en     # See KOLIBRI_SUPPORTED_LANGUAGES at the bottom of https://github.com/learningequality/kolibri/blob/develop/kolibri/utils/i18n.py
 kolibri_home: "{{ content_base }}/kolibri"    # /library/kolibri
 kolibri_user: kolibri    # WARNING: https://github.com/learningequality/kolibri-installer-debian/issues/115
@@ -443,7 +499,7 @@ moodle_enabled: False
 
 # Regional OSM vector maps use far less disk space than bitmap/raster versions.
 # Instructions: https://github.com/iiab/iiab/wiki/IIAB-Maps
-osm_vector_maps_install: False
+osm_vector_maps_install: True
 osm_vector_maps_enabled: False
 # Set to "True" to download .mbtiles files from Archive.org (might be slow!)
 maps_from_internet_archive: False
@@ -514,12 +570,12 @@ transmission_kalite_languages:
 # E. READ "KA Lite Administration: What tips & tricks exist?" AT http://FAQ.IIAB.IO
 
 # AWStats, originally known as Advanced Web Statistics - from https://awstats.sourceforge.io
-awstats_install: False
-awstats_enabled: False
+awstats_install: True
+awstats_enabled: True
 
 # Matomo is a web analytics alternative to Google Analytics, emphasizing privacy and data ownership.
-matomo_install: False
-matomo_enabled: False
+matomo_install: True
+matomo_enabled: True
 # If using Matomo intensively, investigate nginx_high_php_limits further above.
 
 # Process supervision tool - from https://mmonit.com/monit/
@@ -586,8 +642,8 @@ minetest_game_dir: "{{ minetest_working_dir }}/games/{{ minetest_default_game }}
 minetest_flat_world: False
 
 # Calibre-Web E-Book Library -- Alternative to Calibre, offers a clean/modern UX
-calibreweb_install: False
-calibreweb_enabled: False
+calibreweb_install: True
+calibreweb_enabled: True
 calibreweb_port: 8083       # PORT VARIABLE HAS NO EFFECT (as of January 2019)
 # http://box/books works.  Add {box/libros, box/livres, box/livros, box/liv} etc?
 calibreweb_url1: /books     # For SHORT URL http://box/books  (English)
@@ -630,6 +686,72 @@ pbx_signaling_ports_chan_pjsip: 5060
 pbx_data_ports: 10000:20000
 pbx_http_port: 83
 
+
+# =============================================================================
+# UNMAINTAINED LEGACY VARIABLES: YOU'RE TAKING BIG RISKS IF YOU USE ANY HERE...
+
+# Unmaintained
+# osm_install: False
+# osm_enabled: False
+# Changed in June 2017, from the original:
+# iiab_install: True
+# iiab_enabled: False
+
+# Unmaintained
+# docker_install: False
+# docker_enabled: False
+
+# Unmaintained
+# authserver_install: False
+# authserver_enabled: False
+
+# Unmaintained (better to install from https://teamviewer.com or prep scripts at https://download.iiab.io)
+# teamviewer_install: False
+# teamviewer_enabled: False
+
+# Unmaintained
+# schooltool_install: False
+# schooltool_enabled: False
+
+# Unmaintained
+# debian_schooltool_install: False
+# debian_schooltool_enabled: False
+
+# Unmaintained (consider Calibre or Calibre-Web above?)
+# pathagar_install: False
+# pathagar_enabled: False
+
+# Unmaintained
+# sugar_stats_install: False
+# sugar_stats_enabled: False
+
+# Unmaintained
+# xovis_install: False
+# xovis_enabled: False
+# xovis_target_host: "127.0.0.1:5984"
+# xovis_deployment_name: olpc
+# xovis_db_name: xovis
+# xovis_db_user: admin
+# xovis_db_password: admin
+# xovis_root: /opt/xovis
+# xovis_backup_dir: /library/users
+# xovis_chart_heading: "My School: Usage Data Visualization"
+
+# Unmaintained
+# owncloud_install: False
+# owncloud_enabled: False
+
+# Unmaintained
+# ajenti_install: False
+# ajenti_enabled: False
+
+# Unmaintained
+# rachel_install: False
+# rachel_enabled: False
+# rachel_content_found: False
+# #rachel_url: /rachel
+# rachel_doc_root: "{{ doc_root }}/modules"
+# =============================================================================
 
 
 # OS-DEPENDENT VARS: TURN OFF ALL VARS BELOW AND THEN THE CORRECT
