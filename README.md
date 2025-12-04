@@ -37,7 +37,7 @@ Let's move from "learning hotspot" to a more robust and versitile Raspberry Pi s
 
 # New Admin system for configuration
 Let's face it: The web admin interface is really clunky. Let's add:
-0. Consider changing from Ansible to Salt since Ansible on IIAB takes a long time for every little change. Perhaps Docker?
+0. Consider changing from Ansible to Salt since Ansible on IIAB takes a long time for every little change. Perhaps Docker? https://docs.saltproject.io/en/latest/topics/tutorials/quickstart.html#salt-masterless-quickstart:~:text=index-,SALT%20MASTERLESS%20QUICKSTART,-Running%20a%20masterless
 1. Secure connection via SSL/https
 2. User Management with role based access control. (Can we make this usable system-wide?)
 3. System and Network configuration everyone can understand.
